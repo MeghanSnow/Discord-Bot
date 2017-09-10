@@ -1,6 +1,6 @@
-var Discord = require('discord.io');
-var logger = require('winston');
-var auth = require('./auth.json');
+let Discord = require('discord.io');
+let logger = require('winston');
+let auth = require('./auth.json');
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(logger.transports.Console, {
@@ -8,7 +8,7 @@ logger.add(logger.transports.Console, {
 });
 logger.level = 'debug';
 // Initialize Discord Bot
-var bot = new Discord.Client({
+let bot = new Discord.Client({
     token: auth.token,
     autorun: true
 });
@@ -21,15 +21,15 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
     if (message.substring(0, 1) == '!') {
-        var prefix = "!";
-        var args = message.slice(prefix.length).trim().split(/ +/g);
-        var cmd = args.shift().toLowerCase();
+        let prefix = "!";
+        let args = message.slice(prefix.length).trim().split(/ +/g);
+        let cmd = args.shift().toLowerCase();
         // this code was used with no parameters.
         //var args = message.substring(1).split(' ');
         //var cmd = args[0];
         //var user = user.mentionable();
         //args = args.splice(1);
-        switch(cmd) {
+        switch (cmd) {
             case 'ping':
                 bot.sendMessage({
                     to: channelID,
@@ -37,21 +37,27 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 break;
             case 'birthday':
-                var month = args[0];
-                var day = args[1];
-                //TODO: Connect to database and store USERID and MONTH and DAY. UserID must be primary key. ( only one birthday per user )
-                bot.sendMessage({
-                    to: channelID,
-                    message: "<@" + userID + ">"+ 'Your birthday is ' + month + ' ' + day + '! It has been saved to the database.'
-                });
-                break;
-            default:
+                let month = args[0];
+                let day = args[1];
+
+                if (month === null || day === null) {
                     bot.sendMessage({
                         to: channelID,
-                        message: "<@" + userID + ">" + ' Sorry, the robot cannot compute that! Try again with more oil.',
-                        mentionable: true
+                        message: "<@" + userID + ">" + ' Hey, I think you typed your birthday wrong!'
                     });
-
+                } else {
+                    //TODO: Connect to database and store USERID and MONTH and DAY. UserID must be primary key. ( only one birthday per user )
+                    bot.sendMessage({
+                        to: channelID,
+                        message: "<@" + userID + ">" + ' Your birthday is ' + month + ' ' + day + '! It has been saved to the database.'
+                    });
+                }
+                break;
+            default:
+                bot.sendMessage({
+                    to: channelID,
+                    message: "<@" + userID + ">" + ' Sorry, the robot cannot compute that! Try again with more oil.'
+                });
         }
     }
 });
